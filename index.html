@@ -14,6 +14,30 @@
         .serif-display { font-family: 'Playfair Display', serif; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #DBDBDB; border-radius: 4px; }
+
+html {
+    scroll-behavior: smooth;
+    /* Prevents horizontal layout breakages on mobile text overflows */
+    overflow-x: hidden; 
+}
+
+body {
+    background-color: #050505;
+    color: #FFFFFF;
+    /* Handles screen padding for modern bezel-less devices */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+}
+
+/* Custom global container optimization for large-screen grids */
+@media (min-width: 1440px) {
+    .max-w-7xl {
+        max-width: 80rem; /* Clamps layout at 1280px to look premium, not stretched */
+    }
+}
+        
     </style>
 
     <script type="module">
@@ -552,5 +576,28 @@
             if (chosen === "Work") { w.classList.remove('hidden'); p.classList.remove('hidden'); }
         }
     </script>
+
+<!-- START OF GLOBAL RESPONSIVE LAYOUT WRAPPER -->
+<div class="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto safe-top safe-bottom">
+    
+    <!-- 1. NAVIGATION LAYER (Always stays perfectly constrained) -->
+    <header class="w-full relative z-50">
+        <!-- [Insert your specific page <nav> menu markup here] -->
+    </header>
+
+    <!-- 2. MAIN CONTENT LAYER (Adapts to mobile stacked layouts vs desktop grids) -->
+    <main class="w-full flex-grow flex flex-col justify-center py-8 md:py-16 lg:py-24 relative z-10">
+        <!-- [Insert your main page content, forms, feeds, or dashboards here] -->
+    </main>
+
+    <!-- 3. FOOTER LAYER (Stays cleanly anchored at the absolute bottom of the viewport) -->
+    <footer class="w-full py-8 border-t border-neutral-900 text-center relative z-10">
+        <!-- [Insert your explicit footer code here] -->
+    </footer>
+
+</div>
+<!-- END OF GLOBAL RESPONSIVE LAYOUT WRAPPER -->
+
+    
 </body>
 </html>
