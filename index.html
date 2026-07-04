@@ -10,34 +10,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #FAFAFA; }
+        body { font-family: 'Inter', sans-serif; background-color: #050505; color: #FFFFFF; }
         .serif-display { font-family: 'Playfair Display', serif; }
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #DBDBDB; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #262626; border-radius: 4px; }
 
-html {
-    scroll-behavior: smooth;
-    /* Prevents horizontal layout breakages on mobile text overflows */
-    overflow-x: hidden; 
-}
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden; 
+        }
 
-body {
-    background-color: #FFFFFF;
-    color: #080808;
-    /* Handles screen padding for modern bezel-less devices */
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-}
+        body {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
 
-/* Custom global container optimization for large-screen grids */
-@media (min-width: 1440px) {
-    .max-w-7xl {
-        max-width: 80rem; /* Clamps layout at 1280px to look premium, not stretched */
-    }
-}
-        
+        @media (min-width: 1440px) {
+            .max-w-7xl { max-width: 80rem; }
+        }
     </style>
 
     <script type="module">
@@ -69,7 +61,7 @@ body {
       window.viewUserProfile = (uid) => viewUserProfile(uid, db);
       window.acceptJoinRequest = (requestId, applicantUid, applicantName) => acceptJoinRequest(requestId, applicantUid, applicantName, auth, db);
       window.declineJoinRequest = (requestId) => declineJoinRequest(requestId, db);
-      window.handleLogout = () => signOut(auth).then(() => { window.location.href = "index.html"; });
+      window.handleLogout = () => signOut(auth).then(() => { window.location.href = "https://getfilo.github.io/SciMatch-Home"; });
 
       window.activeChatId = null;
       window.chatUnsubscribe = null;
@@ -77,7 +69,7 @@ body {
       window.addEventListener("DOMContentLoaded", () => {
         onAuthStateChanged(auth, async (user) => {
             if (!user) { 
-                window.location.href = "index.html"; 
+                window.location.href = "https://getfilo.github.io/SciMatch-Home"; 
             } else {
                 const snap = await getDoc(doc(db, "profiles", user.uid));
                 if (!snap.exists()) { 
@@ -92,11 +84,12 @@ body {
                 }
             }
         });
-
-        document.getElementById('prof-level').addEventListener('change', (e) => {
-            adjustProfileSubforms(e.target.value);
-        });
       });
+
+      function openProfileModal(email) {
+          document.getElementById('prof-email').value = email;
+          document.getElementById('profileModal').classList.remove('hidden');
+      }
 
       async function handleProfileSaveFlow(event, auth, db) {
           event.preventDefault();
@@ -105,8 +98,8 @@ body {
           const name = document.getElementById('prof-name').value;
           const level = document.getElementById('prof-level').value;
           const email = document.getElementById('prof-email').value;
-          let details = (level === "School") ? document.getElementById('school-details').value : (level === "University" ? document.getElementById('uni-details').value : document.getElementById('work-details').value);
-          const phone = (level !== "School") ? document.getElementById('prof-phone').value : "";
+          const details = document.getElementById('prof-details').value;
+          const phone = document.getElementById('prof-phone').value;
 
           try {
               await setDoc(doc(db, "profiles", user.uid), { uid: user.uid, name, level, details, email, phone, updated_at: new Date() });
@@ -125,8 +118,6 @@ body {
                   document.getElementById('v-details').innerText = u.details || "None provided";
                   document.getElementById('v-email').innerText = u.email || "No public email";
                   document.getElementById('v-phone').innerText = u.phone || "None listed";
-                  
-                  // Open modal view
                   document.getElementById('viewProfileModal').classList.remove('hidden');
               } else {
                   alert("Could not load user profile details.");
@@ -137,7 +128,7 @@ body {
       async function acceptJoinRequest(requestId, applicantUid, applicantName, auth, db) {
           try {
               await updateDoc(doc(db, "connections", requestId), { status: "Accepted" });
-              alert(`Request approved! Initializing direct safe chat with ${applicantName}.`);
+              alert(`Request approved! Initializing direct chat with ${applicantName}.`);
               window.initiateDirectChat(applicantUid, applicantName);
           } catch(e) { alert(e.message); }
       }
@@ -156,7 +147,7 @@ body {
           const resultsTray = document.getElementById('user-search-results');
           
           if(!searchInput) return;
-          resultsTray.innerHTML = '<div class="text-xs text-neutral-400 p-2">Searching members...</div>';
+          resultsTray.innerHTML = '<div class="text-xs text-neutral-500 p-2">Searching members...</div>';
 
           try {
               const snap = await getDocs(collection(db, "profiles"));
@@ -173,12 +164,12 @@ body {
                   if (userName.includes(searchInput) || userEmail.includes(searchInput)) {
                       matchesFound++;
                       resultsTray.innerHTML += `
-                          <div class="flex items-center justify-between p-2 hover:bg-neutral-50 rounded border border-neutral-100 text-xs">
+                          <div class="flex items-center justify-between p-2 hover:bg-neutral-900 rounded border border-neutral-800 text-xs">
                               <div class="truncate mr-2 cursor-pointer" onclick="window.viewUserProfile('${u.uid}')">
-                                  <div class="font-semibold text-neutral-800 underline decoration-dotted">${u.name}</div>
-                                  <div class="text-neutral-400 text-[11px] truncate">${u.email}</div>
+                                  <div class="font-semibold text-neutral-200 underline decoration-dotted">${u.name}</div>
+                                  <div class="text-neutral-500 text-[11px] truncate">${u.email}</div>
                               </div>
-                              <button onclick="window.initiateDirectChat('${u.uid}', '${u.name}')" class="bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-1 rounded-md text-[11px] font-medium tracking-wide">
+                              <button onclick="window.initiateDirectChat('${u.uid}', '${u.name}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded-md text-[11px] font-medium tracking-wide">
                                   Chat
                               </button>
                           </div>
@@ -187,7 +178,7 @@ body {
               });
 
               if (matchesFound === 0) {
-                  resultsTray.innerHTML = '<div class="text-xs text-neutral-400 p-2">No results found</div>';
+                  resultsTray.innerHTML = '<div class="text-xs text-neutral-500 p-2">No results found</div>';
               }
           } catch(err) {
               resultsTray.innerHTML = `<div class="text-xs text-red-500 p-2">Error: ${err.message}</div>`;
@@ -196,11 +187,11 @@ body {
 
       async function fetchActiveProjects(db, user) {
           const container = document.getElementById('listings-feed');
-          container.innerHTML = '<div class="text-sm text-neutral-400 text-center py-12">Loading your feed...</div>';
+          container.innerHTML = '<div class="text-sm text-neutral-500 text-center py-12">Loading your feed...</div>';
           try {
               const q = query(collection(db, "projects"), where("is_active", "==", true), orderBy("created_at", "desc"));
               const snap = await getDocs(q);
-              if (snap.empty) { container.innerHTML = '<div class="text-sm text-neutral-400 text-center py-12">No posts available.</div>'; return; }
+              if (snap.empty) { container.innerHTML = '<div class="text-sm text-neutral-500 text-center py-12">No posts available.</div>'; return; }
               document.getElementById('listing-count').innerText = `${snap.size} Active`;
 
               let html = "";
@@ -214,42 +205,42 @@ body {
                   let logsHtml = "";
                   if (logSnap && logSnap.forEach) {
                       logSnap.forEach(l => {
-                          logsHtml += `<div class="text-xs text-neutral-700 bg-neutral-50 border border-neutral-100 rounded-md p-2 mt-1.5 font-mono"><span class="text-neutral-400 mr-1">#</span> ${l.data().text}</div>`;
+                          logsHtml += `<div class="text-xs text-neutral-300 bg-neutral-900 border border-neutral-800 rounded-md p-2 mt-1.5 font-mono"><span class="text-neutral-500 mr-1">#</span> ${l.data().text}</div>`;
                       });
                   }
 
                   html += `
-                      <article class="bg-white border border-neutral-200 rounded-lg mb-6 overflow-hidden shadow-sm">
-                          <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
+                      <article class="bg-neutral-950 border border-neutral-900 rounded-xl mb-6 overflow-hidden shadow-sm">
+                          <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-900">
                               <div class="flex items-center space-x-2">
                                   <div class="w-8 h-8 rounded-full bg-neutral-800 text-white flex items-center justify-center font-bold text-xs uppercase cursor-pointer" onclick="window.viewUserProfile('${p.owner_uid}')">
                                       ${(p.owner_name || 'A').substring(0,2)}
                                   </div>
                                   <div>
-                                      <span class="text-sm font-semibold text-neutral-900 cursor-pointer hover:underline" onclick="window.viewUserProfile('${p.owner_uid}')">
+                                      <span class="text-sm font-semibold text-neutral-200 cursor-pointer hover:underline" onclick="window.viewUserProfile('${p.owner_uid}')">
                                           ${p.owner_name || 'Anonymous'}
                                       </span>
-                                      <span class="text-neutral-400 mx-1 text-xs">•</span>
-                                      <span class="text-xs text-neutral-500 font-light">${p.institution || 'Independent'}</span>
+                                      <span class="text-neutral-600 mx-1 text-xs">•</span>
+                                      <span class="text-xs text-neutral-400 font-light">${p.institution || 'Independent'}</span>
                                   </div>
                               </div>
-                              <span class="bg-neutral-100 text-neutral-800 px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded">
+                              <span class="bg-neutral-900 text-neutral-300 px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded border border-neutral-800">
                                   ${p.target_level || 'School'}
                               </span>
                           </div>
 
                           <div class="p-5">
-                              <h3 class="serif-display text-xl font-semibold text-neutral-900 mb-2">${p.title}</h3>
-                              <p class="text-sm text-neutral-600 leading-relaxed font-light mb-4">${p.description}</p>
+                              <h3 class="serif-display text-xl font-semibold text-white mb-2">${p.title}</h3>
+                              <p class="text-sm text-neutral-400 leading-relaxed font-light mb-4">${p.description}</p>
                               
-                              <div class="text-[11px] font-bold text-neutral-400 tracking-wider uppercase border-t border-neutral-100 pt-3">Category: <span class="text-neutral-800 normal-case font-medium">${p.category || 'General'}</span></div>
+                              <div class="text-[11px] font-bold text-neutral-500 tracking-wider uppercase border-t border-neutral-900 pt-3">Category: <span class="text-neutral-300 normal-case font-medium">${p.category || 'General'}</span></div>
                               
-                              ${logsHtml ? `<div class="mt-4 space-y-1"><div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Updates:</div>${logsHtml}</div>` : ''}
+                              ${logsHtml ? `<div class="mt-4 space-y-1"><div class="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Updates:</div>${logsHtml}</div>` : ''}
                           </div>
 
-                          <div class="bg-neutral-50 border-t border-neutral-100 px-4 py-3 flex justify-end items-center gap-3">
-                              ${user.uid !== p.owner_uid ? `<button onclick="window.triggerApplicationLoop('${d.id}', '${p.owner_email}', '${p.title}', '${p.owner_uid}')" class="text-xs bg-blue-500 text-white px-4 py-1.5 rounded-md font-semibold hover:bg-blue-600 transition">Ask to Join</button>` : ''}
-                              ${user.uid === p.owner_uid ? `<button onclick="window.addProgressLog('${d.id}')" class="text-xs border border-neutral-300 text-neutral-700 bg-white px-4 py-1.5 rounded-md font-semibold hover:bg-neutral-50 transition">+ Post Update</button>` : ''}
+                          <div class="bg-neutral-950 border-t border-neutral-900 px-4 py-3 flex justify-end items-center gap-3">
+                              ${user.uid !== p.owner_uid ? `<button onclick="window.triggerApplicationLoop('${d.id}', '${p.owner_email}', '${p.title}', '${p.owner_uid}')" class="text-xs bg-blue-600 text-white px-4 py-1.5 rounded-md font-semibold hover:bg-blue-700 transition">Ask to Join</button>` : ''}
+                              ${user.uid === p.owner_uid ? `<button onclick="window.addProgressLog('${d.id}')" class="text-xs border border-neutral-800 text-neutral-300 bg-neutral-900 px-4 py-1.5 rounded-md font-semibold hover:bg-neutral-800 transition">+ Post Update</button>` : ''}
                           </div>
                       </article>
                   `;
@@ -314,22 +305,20 @@ body {
       function setupRealtimeDashboard(auth, db) {
           const user = auth.currentUser;
 
-          // Outbound (Sent Requests Box) Realtime Loop
           onSnapshot(query(collection(db, "connections"), where("applicant_uid", "==", user.uid)), (snap) => {
               let outHtml = "";
               snap.forEach(d => { 
                   const data = d.data();
-                  const badgeColor = data.status === "Accepted" ? "text-green-600 font-bold" : "text-neutral-400";
+                  const badgeColor = data.status === "Accepted" ? "text-green-500 font-bold" : "text-neutral-500";
                   outHtml += `
-                      <div class="py-2.5 border-b border-neutral-100 text-xs text-neutral-600">
-                          <div>Sent request for <strong class="text-neutral-900">${data.project_title}</strong></div>
+                      <div class="py-2.5 border-b border-neutral-900 text-xs text-neutral-400">
+                          <div>Sent request for <strong class="text-neutral-200">${data.project_title}</strong></div>
                           <div class="text-[10px] mt-0.5">Status: <span class="${badgeColor}">${data.status || 'Pending'}</span></div>
                       </div>`; 
               });
-              document.getElementById('dash-outbound').innerHTML = outHtml || '<div class="text-neutral-400 italic text-xs py-1">No sent requests.</div>';
+              document.getElementById('dash-outbound').innerHTML = outHtml || '<div class="text-neutral-500 italic text-xs py-1">No sent requests.</div>';
           });
 
-          // Inbound (Received Requests Box with Accept/Decline) Realtime Loop
           onSnapshot(query(collection(db, "connections"), where("owner_uid", "==", user.uid)), (snap) => {
               let inHtml = "";
               snap.forEach(d => {
@@ -337,27 +326,27 @@ body {
                   const isAccepted = data.status === "Accepted";
                   
                   inHtml += `
-                      <div class="py-3 border-b border-neutral-100 text-xs space-y-1.5">
-                          <div class="text-neutral-600">
-                              <span class="font-bold text-neutral-900 cursor-pointer hover:underline" onclick="window.viewUserProfile('${data.applicant_uid}')">${data.applicant_name || data.applicant_email}</span> wants to join <span class="font-bold text-neutral-900">${data.project_title}</span>
+                      <div class="py-3 border-b border-neutral-900 text-xs space-y-1.5">
+                          <div class="text-neutral-400">
+                              <span class="font-bold text-neutral-200 cursor-pointer hover:underline" onclick="window.viewUserProfile('${data.applicant_uid}')">${data.applicant_name || data.applicant_email}</span> wants to join <span class="font-bold text-neutral-200">${data.project_title}</span>
                           </div>
-                          <div class="italic text-neutral-500 bg-neutral-50 p-2 rounded border border-neutral-100 text-[11px]">
+                          <div class="italic text-neutral-400 bg-neutral-900 p-2 rounded border border-neutral-800 text-[11px]">
                               "${data.statement}"
                           </div>
                           <div class="flex items-center space-x-2 pt-1">
                               ${!isAccepted ? `
-                                  <button onclick="window.acceptJoinRequest('${d.id}', '${data.applicant_uid}', '${data.applicant_name}')" class="bg-blue-500 text-white font-medium text-[11px] px-2.5 py-1 rounded hover:bg-blue-600 transition">Accept</button>
-                                  <button onclick="window.declineJoinRequest('${d.id}')" class="border border-neutral-200 text-neutral-500 font-medium text-[11px] px-2.5 py-1 rounded hover:bg-neutral-50 transition">Decline</button>
+                                  <button onclick="window.acceptJoinRequest('${d.id}', '${data.applicant_uid}', '${data.applicant_name}')" class="bg-blue-600 text-white font-medium text-[11px] px-2.5 py-1 rounded hover:bg-blue-700 transition">Accept</button>
+                                  <button onclick="window.declineJoinRequest('${d.id}')" class="border border-neutral-800 text-neutral-400 font-medium text-[11px] px-2.5 py-1 rounded hover:bg-neutral-900 transition">Decline</button>
                               ` : `
-                                  <span class="text-green-600 font-bold text-[11px] flex items-center space-x-1">
+                                  <span class="text-green-500 font-bold text-[11px] flex items-center space-x-1">
                                       <span>✓ Connected</span>
                                   </span>
-                                  <button onclick="window.initiateDirectChat('${data.applicant_uid}', '${data.applicant_name}')" class="text-blue-500 font-medium text-[11px] underline ml-2">Chat Now</button>
+                                  <button onclick="window.initiateDirectChat('${data.applicant_uid}', '${data.applicant_name}')" class="text-blue-400 font-medium text-[11px] underline ml-2">Chat Now</button>
                               `}
                           </div>
                       </div>`;
               });
-              document.getElementById('dash-inbound').innerHTML = inHtml || '<div class="text-neutral-400 italic text-xs py-1">No received requests yet.</div>';
+              document.getElementById('dash-inbound').innerHTML = inHtml || '<div class="text-neutral-500 italic text-xs py-1">No received requests yet.</div>';
           });
       }
 
@@ -377,7 +366,7 @@ body {
               stream.innerHTML = "";
               snap.forEach(m => {
                   const d = m.data(); const isMe = d.sender_uid === user.uid;
-                  stream.innerHTML += `<div class="flex ${isMe ? 'justify-end' : 'justify-start'} w-full"><div class="max-w-[75%] p-2 rounded-lg ${isMe ? 'bg-blue-500 text-white' : 'bg-neutral-200 text-neutral-900'} text-xs">${d.text}</div></div>`;
+                  stream.innerHTML += `<div class="flex ${isMe ? 'justify-end' : 'justify-start'} w-full"><div class="max-w-[75%] p-2 rounded-lg ${isMe ? 'bg-blue-600 text-white' : 'bg-neutral-800 text-neutral-200'} text-xs">${d.text}</div></div>`;
               });
               stream.scrollTop = stream.scrollHeight;
           });
@@ -388,13 +377,12 @@ body {
               const box = document.getElementById('chat-threads-tray'); box.innerHTML = "";
               
               if(snap.empty) {
-                  box.innerHTML = '<div class="text-xs text-neutral-400 italic p-2">No active message histories.</div>';
+                  box.innerHTML = '<div class="text-xs text-neutral-500 italic p-2">No active message histories.</div>';
                   return;
               }
 
               snap.forEach(async (c) => {
                   const peerUid = c.data().participants.find(p => p !== auth.currentUser.uid);
-                  
                   const profileSnap = await getDoc(doc(db, "profiles", peerUid));
                   let peerName = "Active Member";
                   if(profileSnap.exists()) {
@@ -404,12 +392,12 @@ body {
                   const btnId = `btn-chat-${peerUid}`;
                   if(!document.getElementById(btnId)) {
                       box.innerHTML += `
-                          <button id="${btnId}" onclick="window.initiateDirectChat('${peerUid}', '${peerName}')" class="w-full text-left text-xs p-2.5 hover:bg-neutral-50 rounded-md border-b border-neutral-100 flex items-center justify-between transition">
+                          <button id="${btnId}" onclick="window.initiateDirectChat('${peerUid}', '${peerName}')" class="w-full text-left text-xs p-2.5 hover:bg-neutral-900 rounded-md border-b border-neutral-900 flex items-center justify-between transition">
                               <div class="flex items-center space-x-2 truncate">
-                                  <div class="w-6 h-6 rounded-full bg-neutral-200 flex items-center justify-center font-bold text-[10px] text-neutral-600 uppercase">${peerName.substring(0,2)}</div>
-                                  <div class="truncate font-medium text-neutral-800">${peerName}</div>
+                                  <div class="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center font-bold text-[10px] text-neutral-300 uppercase">${peerName.substring(0,2)}</div>
+                                  <div class="truncate font-medium text-neutral-200">${peerName}</div>
                               </div>
-                              <span onclick="event.stopPropagation(); window.viewUserProfile('${peerUid}')" class="text-[10px] text-neutral-400 hover:text-black underline px-1">Profile</span>
+                              <span onclick="event.stopPropagation(); window.viewUserProfile('${peerUid}')" class="text-[10px] text-neutral-500 hover:text-white underline px-1">Profile</span>
                           </button>
                       `;
                   }
@@ -428,70 +416,69 @@ body {
       }
     </script>
 </head>
-<body class="text-neutral-900 antialiased min-h-screen flex flex-col justify-between">
+<body class="antialiased min-h-screen flex flex-col justify-between">
 
-    <header class="border-b border-neutral-200 py-4 px-4 md:px-12 w-full bg-white sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
+    <header class="border-b border-neutral-900 py-4 px-4 sm:px-6 lg:px-8 w-full bg-neutral-950 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-baseline space-x-2">
-                <span class="serif-display text-2xl font-bold tracking-tight cursor-pointer" onclick="window.location.href='https://getfilo.github.io/SciMatch-Home'">SciMatch</span>
-                <span class="text-xs text-neutral-400 font-light hidden sm:inline">Dashboard Feed</span>
+                <span class="serif-display text-2xl font-bold tracking-tight text-white cursor-pointer" onclick="window.location.href='https://getfilo.github.io/SciMatch-Home'">SciMatch</span>
+                <span class="text-xs text-neutral-500 font-light hidden sm:inline">Dashboard Feed</span>
             </div>
             
-            <div class="flex items-center space-x-6 text-sm font-medium">
-                <button onclick="window.createNewProject()" class="bg-black text-white px-4 py-1.5 rounded-full text-xs font-semibold hover:bg-neutral-800 transition">
+            <div class="flex items-center space-x-4 sm:space-x-6 text-sm font-medium">
+                <button onclick="window.createNewProject()" class="bg-white text-black px-4 py-1.5 rounded-full text-xs font-bold hover:bg-neutral-200 transition">
                     + Post Project
                 </button>
-                <div class="flex items-center space-x-1 text-neutral-500">
-                    <span>👤</span>
-                    <span id="profile-tag" class="text-xs font-semibold max-w-[100px] truncate">...</span>
+                <div class="flex items-center space-x-1 text-neutral-400">
+                    <span id="profile-tag" class="text-xs font-semibold max-w-[80px] sm:max-w-[120px] truncate">...</span>
                 </div>
-                <button onclick="window.handleLogout()" class="text-red-500 hover:text-red-600 text-xs font-semibold">Sign Out</button>
+                <button onclick="window.handleLogout()" class="text-red-500 hover:text-red-400 text-xs font-semibold">Sign Out</button>
             </div>
         </div>
     </header>
 
-    <main class="w-full max-w-6xl mx-auto px-4 py-8 flex-grow">
+    <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             
-            <div class="lg:col-span-2">
-                <div class="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-400 flex justify-between items-center px-1">
+            <div class="lg:col-span-2 order-2 lg:order-1">
+                <div class="mb-4 text-xs font-bold uppercase tracking-wider text-neutral-500 flex justify-between items-center px-1">
                     <span>Explore Science Projects</span>
-                    <span id="listing-count" class="normal-case text-neutral-500 font-normal">0 Active</span>
+                    <span id="listing-count" class="normal-case text-neutral-400 font-normal">0 Active</span>
                 </div>
                 <section id="listings-feed" class="space-y-6"></section>
             </div>
             
-            <div class="space-y-6 lg:sticky lg:top-24">
+            <div class="space-y-6 lg:sticky lg:top-24 order-1 lg:order-2">
                 
-                <div class="bg-white border border-neutral-200 rounded-lg p-4 shadow-sm">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-900 mb-3 flex items-center space-x-1">
+                <div class="bg-neutral-950 border border-neutral-900 rounded-xl p-4 shadow-sm">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-white mb-3 flex items-center space-x-1">
                         <span>💬 Direct Messages</span>
                     </h4>
                     
                     <form onsubmit="window.searchUsersToChat(event)" class="flex gap-1 mb-4">
-                        <input id="user-search-input" type="text" placeholder="Search name or email..." class="w-full text-xs p-2 bg-neutral-50 border border-neutral-200 rounded-md focus:outline-none focus:ring-1 focus:ring-neutral-400">
-                        <button type="submit" class="bg-neutral-900 hover:bg-black text-white px-3 text-xs font-bold rounded-md transition">Find</button>
+                        <input id="user-search-input" type="text" placeholder="Search name or email..." class="w-full text-xs p-2 bg-neutral-900 border border-neutral-800 text-white rounded-md focus:outline-none">
+                        <button type="submit" class="bg-white hover:bg-neutral-200 text-black px-3 text-xs font-bold rounded-md transition">Find</button>
                     </form>
                     
                     <div id="user-search-results" class="space-y-1 mb-4 max-h-32 overflow-y-auto"></div>
                     
-                    <div class="border-t border-neutral-100 pt-3">
-                        <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">Recent chats</div>
+                    <div class="border-t border-neutral-900 pt-3">
+                        <div class="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">Recent chats</div>
                         <div id="chat-threads-tray" class="space-y-1 max-h-48 overflow-y-auto"></div>
                     </div>
                 </div>
 
-                <div class="bg-white border border-neutral-200 rounded-lg p-4 shadow-sm">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">📥 Received Project Requests</h4>
+                <div class="bg-neutral-950 border border-neutral-900 rounded-xl p-4 shadow-sm">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">📥 Received Requests</h4>
                     <div id="dash-inbound" class="space-y-2 max-h-48 overflow-y-auto">
-                        <div class="text-neutral-400 italic text-xs py-1">Loading requests...</div>
+                        <div class="text-neutral-500 italic text-xs py-1">Loading requests...</div>
                     </div>
                 </div>
 
-                <div class="bg-white border border-neutral-200 rounded-lg p-4 shadow-sm">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">📤 Sent Requests</h4>
+                <div class="bg-neutral-950 border border-neutral-900 rounded-xl p-4 shadow-sm">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">📤 Sent Requests</h4>
                     <div id="dash-outbound" class="space-y-2 max-h-48 overflow-y-auto">
-                        <div class="text-neutral-400 italic text-xs py-1">Loading outbox...</div>
+                        <div class="text-neutral-500 italic text-xs py-1">Loading outbox...</div>
                     </div>
                 </div>
                 
@@ -499,105 +486,63 @@ body {
         </div>
     </main>
 
-    <div id="viewProfileModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl max-w-sm w-full p-6 relative shadow-xl text-center">
-            <button onclick="document.getElementById('viewProfileModal').classList.add('hidden')" class="absolute top-4 right-4 text-xs font-bold text-neutral-400 hover:text-black">[ Close ]</button>
-            
-            <div class="w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xl uppercase mx-auto mb-3 shadow-inner">
-                👤
-            </div>
-            <h3 id="v-name" class="serif-display text-2xl font-bold text-neutral-900">...</h3>
+    <div id="chat-module-window" class="fixed right-0 top-0 bottom-0 w-full sm:w-96 bg-neutral-950 border-l border-neutral-900 shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between">
+        <div class="p-4 border-b border-neutral-900 flex items-center justify-between bg-neutral-950">
+            <div class="font-bold text-sm text-white truncate" id="chat-peer-name">Loading Conversation...</div>
+            <button onclick="document.getElementById('chat-module-window').classList.add('translate-x-full')" class="text-xs font-mono text-neutral-500 hover:text-white px-2 py-1">[ Close ]</button>
+        </div>
+        <div id="chat-msg-stream" class="p-4 flex-grow overflow-y-auto space-y-3 flex flex-col bg-neutral-900/40"></div>
+        <form onsubmit="window.transmitChatMessage(event)" class="p-3 border-t border-neutral-900 bg-neutral-950 flex gap-2">
+            <input id="chat-input-node" type="text" placeholder="Type verified encrypted packet..." class="w-full text-xs p-2.5 bg-neutral-900 text-white border border-neutral-800 rounded-lg focus:outline-none">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 rounded-lg transition">Send</button>
+        </form>
+    </div>
+
+    <div id="viewProfileModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-neutral-950 border border-neutral-900 rounded-2xl max-w-sm w-full p-6 relative shadow-xl text-center">
+            <button onclick="document.getElementById('viewProfileModal').classList.add('hidden')" class="absolute top-4 right-4 text-xs font-mono text-neutral-500 hover:text-white">[ Close ]</button>
+            <div class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-lg mx-auto mb-3">👤</div>
+            <h3 id="v-name" class="serif-display text-2xl font-bold text-white">...</h3>
             <p id="v-level" class="text-xs font-bold text-blue-500 uppercase tracking-wider mt-0.5">...</p>
-            
-            <div class="mt-4 border-t border-neutral-100 pt-4 text-left space-y-2 text-xs">
-                <div><span class="text-neutral-400 font-medium">Grade / Title:</span> <span id="v-details" class="text-neutral-800 font-medium">...</span></div>
-                <div><span class="text-neutral-400 font-medium">Email Address:</span> <span id="v-email" class="text-neutral-800 font-medium">...</span></div>
-                <div><span class="text-neutral-400 font-medium">Contact Phone:</span> <span id="v-phone" class="text-neutral-800 font-medium">...</span></div>
+            <div class="mt-4 border-t border-neutral-900 pt-4 text-left space-y-2 text-xs">
+                <div class="text-neutral-400">Layer Info: <span id="v-details" class="text-neutral-200 ml-1">...</span></div>
+                <div class="text-neutral-400">Verified Email: <span id="v-email" class="text-neutral-200 ml-1">...</span></div>
+                <div class="text-neutral-400">Secure Line: <span id="v-phone" class="text-neutral-200 ml-1">...</span></div>
             </div>
         </div>
     </div>
 
-    <div id="profileModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl max-w-md w-full p-6 relative shadow-xl max-h-[90vh] overflow-y-auto">
-            <h3 class="serif-display text-2xl font-bold mb-1">Set Up Your Profile</h3>
-            <p class="text-xs text-neutral-400 mb-6">Tell other students who you are before diving into the feed.</p>
+    <div id="profileModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-neutral-950 border border-neutral-900 rounded-2xl max-w-md w-full p-6 relative shadow-xl max-h-[90vh] overflow-y-auto">
+            <h3 class="serif-display text-2xl font-bold text-white mb-1">Set Up Your Profile</h3>
+            <p class="text-xs text-neutral-500 mb-6">Complete your credential verification to explore the workspace matrix.</p>
             <form class="space-y-4" onsubmit="window.handleProfileSave(event)">
-                <div><label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Your Full Name</label><input id="prof-name" type="text" required placeholder="Jane Doe" class="w-full text-sm p-2 border border-neutral-200 rounded-md focus:outline-none"></div>
+                <div><label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Full Name</label><input id="prof-name" type="text" required class="w-full text-sm p-2 bg-neutral-900 border border-neutral-800 text-white rounded-md focus:outline-none"></div>
                 <div>
-                    <label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Education or Work Level</label>
-                    <select id="prof-level" required class="w-full text-sm p-2 border border-neutral-200 rounded-md focus:outline-none bg-white">
-                        <option value="School">School Student (K-12)</option><option value="University">University Student</option><option value="Work">Professional / Researcher</option>
+                    <label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Academic Tier Level</label>
+                    <select id="prof-level" required class="w-full text-sm p-2 bg-neutral-900 border border-neutral-800 text-white rounded-md focus:outline-none">
+                        <option value="School">K-12 Builder</option>
+                        <option value="University">University Student</option>
+                        <option value="Work">Field Researcher / Professional</option>
                     </select>
                 </div>
-                <div id="wrapper-school">
-                    <label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Grade Level</label>
-                    <select id="school-details" class="w-full text-sm p-2 border border-neutral-200 rounded-md focus:outline-none bg-white"><option value="Grade 6">Grade 6</option><option value="Grade 7">Grade 7</option><option value="Grade 8">Grade 8</option><option value="Grade 9">Grade 9</option><option value="Grade 10">Grade 10</option><option value="Grade 11">Grade 11</option><option value="Grade 12">Grade 12</option></select>
-                </div>
-                <div id="wrapper-uni" class="hidden">
-                    <label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Year of Study</label>
-                    <select id="uni-details" class="w-full text-sm p-2 border border-neutral-200 rounded-md focus:outline-none bg-white"><option value="1st Year">1st Year</option><option value="2nd Year">2nd Year</option><option value="3rd Year">3rd Year</option><option value="4th Year">4th Year</option><option value="5th Year">5th Year</option></select>
-                </div>
-                <div id="wrapper-work" class="hidden">
-                    <label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Your Role/Job Title</label>
-                    <input id="work-details" type="text" placeholder="e.g. Science Teacher, Physicist" class="w-full text-sm p-2 border border-neutral-200 rounded-md focus:outline-none">
-                </div>
-                <div><label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Contact Email</label><input id="prof-email" type="email" required placeholder="name@email.com" class="w-full text-sm p-2 border border-neutral-200 rounded-md focus:outline-none bg-neutral-50" readonly></div>
-                <div id="wrapper-phone" class="hidden">
-                    <label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Phone Number (Optional)</label>
-                    <input id="prof-phone" type="tel" placeholder="+1 (555) 000-0000" class="w-full text-sm p-2 border border-neutral-200 rounded-md focus:outline-none">
-                </div>
-                <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-md text-xs uppercase font-bold tracking-wider transition mt-4">Save Profile</button>
+                <div><label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Organization / Specific Details</label><input id="prof-details" type="text" required class="w-full text-sm p-2 bg-neutral-900 border border-neutral-800 text-white rounded-md focus:outline-none"></div>
+                <div><label class="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1">Secure Contact Number</label><input id="prof-phone" type="text" class="w-full text-sm p-2 bg-neutral-900 border border-neutral-800 text-white rounded-md focus:outline-none"></div>
+                <input id="prof-email" type="hidden">
+                <button type="submit" class="w-full bg-white text-black font-bold text-xs py-2.5 rounded-lg hover:bg-neutral-200 transition">Save Profile Architecture</button>
             </form>
         </div>
     </div>
 
-    <div id="chat-module-window" class="fixed right-0 top-0 bottom-0 w-80 bg-white border-l border-neutral-200 shadow-xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col justify-between">
-        <div class="p-4 border-b border-neutral-200 flex justify-between items-center bg-neutral-50">
-            <div class="flex items-center space-x-2 truncate">
-                <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                <span class="text-xs font-bold text-neutral-800 truncate"><span id="chat-peer-name">User</span></span>
+    <footer class="border-t border-neutral-900 py-8 px-4 text-center text-[11px] text-neutral-600 font-light mt-12 w-full">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>&copy; 2026 SciMatch. All Rights Reserved.</div>
+            <div class="flex space-x-6 text-neutral-500">
+                <a href="https://getfilo.github.io/SciMatch/privacy-terms.html" class="hover:text-white transition">Privacy Architecture</a>
+                <a href="https://getfilo.github.io/SciMatch/rules.html" class="hover:text-white transition">Network Rules</a>
             </div>
-            <button onclick="if(window.chatUnsubscribe){window.chatUnsubscribe();} document.getElementById('chat-module-window').classList.add('translate-x-full')" class="text-xs font-bold text-neutral-400 hover:text-neutral-900">[ Close ]</button>
         </div>
-        <div id="chat-msg-stream" class="p-4 flex-grow overflow-y-auto space-y-3 bg-[#FAFAFA] flex flex-col"></div>
-        <form onsubmit="window.transmitChatMessage(event)" class="p-2 border-t border-neutral-200 bg-white flex items-center space-x-2">
-            <input id="chat-input-node" autocomplete="off" type="text" placeholder="Message..." class="flex-grow text-xs p-2 bg-neutral-50 border border-neutral-200 rounded-full focus:outline-none px-4">
-            <button type="submit" class="text-blue-500 hover:text-blue-600 text-xs font-bold uppercase pr-2">Send</button>
-        </form>
-    </div>
-
-    <script>
-        function openProfileModal(email) { document.getElementById('prof-email').value = email; adjustProfileSubforms("School"); document.getElementById('profileModal').classList.remove('hidden'); }
-        function adjustProfileSubforms(chosen) {
-            const s = document.getElementById('wrapper-school'), u = document.getElementById('wrapper-uni'), w = document.getElementById('wrapper-work'), p = document.getElementById('wrapper-phone');
-            s.classList.add('hidden'); u.classList.add('hidden'); w.classList.add('hidden'); p.classList.add('hidden');
-            if (chosen === "School") s.classList.remove('hidden');
-            if (chosen === "University") { u.classList.remove('hidden'); p.classList.remove('hidden'); }
-            if (chosen === "Work") { w.classList.remove('hidden'); p.classList.remove('hidden'); }
-        }
-    </script>
-
-<!-- START OF GLOBAL RESPONSIVE LAYOUT WRAPPER -->
-<div class="min-h-screen w-full flex flex-col justify-between relative overflow-x-hidden px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto safe-top safe-bottom">
-    
-    <!-- 1. NAVIGATION LAYER (Always stays perfectly constrained) -->
-    <header class="w-full relative z-50">
-        <!-- [Insert your specific page <nav> menu markup here] -->
-    </header>
-
-    <!-- 2. MAIN CONTENT LAYER (Adapts to mobile stacked layouts vs desktop grids) -->
-    <main class="w-full flex-grow flex flex-col justify-center py-8 md:py-16 lg:py-24 relative z-10">
-        <!-- [Insert your main page content, forms, feeds, or dashboards here] -->
-    </main>
-
-    <!-- 3. FOOTER LAYER (Stays cleanly anchored at the absolute bottom of the viewport) -->
-    <footer class="w-full py-8 border-t border-neutral-900 text-center relative z-10">
-        <!-- [Insert your explicit footer code here] -->
     </footer>
 
-</div>
-<!-- END OF GLOBAL RESPONSIVE LAYOUT WRAPPER -->
-
-    
 </body>
 </html>
